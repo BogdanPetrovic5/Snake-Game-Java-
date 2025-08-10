@@ -5,11 +5,11 @@ import java.util.Random;
 public class Food {
     private Point foodPosition;
     public FoodType foodType;
-    public Food(int gridHeight, int gridWidth){
+    public Food(int rows, int cells, int cellSize){
         Random random = new Random();
 
-        int foodX = random.nextInt(gridWidth);
-        int foodY = random.nextInt(gridHeight);
+        int foodX = random.nextInt(cells) * cellSize;
+        int foodY = random.nextInt(rows) * cellSize;
         foodPosition = new Point(foodX, foodY);
     }
 

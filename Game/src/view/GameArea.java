@@ -1,11 +1,10 @@
 package view;
 
 import controllers.GameController;
+import interfaces.IControlPanel;
 import interfaces.IGameUI;
-import models.Direction;
-import models.Food;
+import models.*;
 import models.Point;
-import models.Snake;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -19,10 +18,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Random;
-import javax.swing.Timer;
+
 
 public class GameArea extends JPanel implements IGameUI, ActionListener, KeyListener {
-
+    private Timer logicTimer;
+    private Timer renderTimer;
     Random randomStartingPoint;
     private GameController _gameController;
     private BufferedImage _snakeHead;
@@ -34,9 +34,9 @@ public class GameArea extends JPanel implements IGameUI, ActionListener, KeyList
     private Snake _snake;
     private Food _food;
     private Timer _gameTimer;
-
+    public int speed = 175;
     public GameArea(GameController gameController, Snake snake, Food food){
-        this.setPreferredSize(new Dimension(600,640));
+        this.setPreferredSize(new Dimension(600,600));
         this._snake = snake;
         this._food = food;
         randomStartingPoint = new Random();
@@ -54,9 +54,20 @@ public class GameArea extends JPanel implements IGameUI, ActionListener, KeyList
         requestFocusInWindow();
         addKeyListener(this);
 
-        _gameTimer = new Timer(100, this);
-        _gameTimer.start();
+//        _gameTimer = new Timer(speed, this);
+//        _gameTimer.start();
     }
+    @Override
+    public void setSpeed(double option){
+        if(option == 1.0) speed = 300;
+        else if(option == 0.5) speed = 175;
+        else if(option == 0.2) speed = 120;
+
+
+        setFocusable(true);
+        requestFocusInWindow();
+    }
+
     @Override
     protected void paintComponent(Graphics graphics){
         super.paintComponent(graphics);
@@ -86,24 +97,26 @@ public class GameArea extends JPanel implements IGameUI, ActionListener, KeyList
             Point segment = snakeBody.get(i);
             if(i == 0){
                 Graphics2D rotateHead = (Graphics2D) graphics.create();
-                double drawX = segment.x * _cellSize;
-                double drawY = segment.y * _cellSize;
+                double drawX = segment.x ;
+                double drawY = segment.y;
                 double centerX = drawX + (double) _cellSize / 2;
                 double centerY = drawY + (double) _cellSize / 2;
                 rotateHead.rotate(angle, centerX, centerY);
                 rotateHead.drawImage(_snakeHead, (int)drawX, (int)drawY, _cellSize, _cellSize, this);
+//                graphics.setColor(new Color(2, 145, 48));
+//                graphics.fillRect((int)drawX,(int)drawY, _cellSize, _cellSize);
 
             }else{
-                double drawX = segment.x * _cellSize;
-                double drawY = segment.y * _cellSize;
+                double drawX = segment.x;
+                double drawY = segment.y;
                 graphics.setColor(Color.green);
                 graphics.fillRect((int)drawX,(int)drawY, _cellSize, _cellSize);
             }
 
         }
         Point foodPosition = _food.getFoodPosition();
-        double drawX = foodPosition.x * _cellSize;
-        double drawY = foodPosition.y * _cellSize;
+        double drawX = foodPosition.x;
+        double drawY = foodPosition.y;
         graphics2D.drawImage(_foodIcon, (int)drawX, (int)drawY, _cellSize, _cellSize, this);
 
         graphics2D.dispose();
@@ -112,10 +125,12 @@ public class GameArea extends JPanel implements IGameUI, ActionListener, KeyList
 
     @Override
     public void actionPerformed(ActionEvent e) {
+//        if(_gameTimer != null){
+//            _gameController.moveSnake();
+//            _gameController.checkCollisions();
+//            repaint();
+//        }
 
-        _gameController.moveSnake();
-        _gameController.checkCollisions();
-        repaint();
 
 
     }
@@ -133,7 +148,7 @@ public class GameArea extends JPanel implements IGameUI, ActionListener, KeyList
             case KeyEvent.VK_LEFT -> _gameController.setDirection(Direction.LEFT);
             case KeyEvent.VK_RIGHT -> _gameController.setDirection(Direction.RIGHT);
         }
-        repaint();
+
     }
 
     @Override
@@ -153,5 +168,17 @@ public class GameArea extends JPanel implements IGameUI, ActionListener, KeyList
     @Override
     public void showGameOver() {
 
+    }
+
+    @Override
+    public void startTimer() {
+        renderTimer = new Timer(100, e -> {
+            _gameController.moveSnake();
+            _gameController.checkCollisions();
+            repaint();
+        });
+        renderTimer.start();
+        setFocusable(true);
+        requestFocusInWindow();
     }
 }

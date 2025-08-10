@@ -10,39 +10,27 @@ public class Snake {
     public Direction currentDirection = null;
     public int cellSize;
     public Direction nextDirection = null;
-    public double progress = 1.0;
+    public int progress = 40;
     private boolean isMoving = true;
 
     public int limit;
-    public Snake(int rows, int col, int cellSize){
+    public Snake(int rows, int col, int cellSize, int width, int height){
         body = new ArrayList<>();
         Random randomStartingPoint = new Random();
-        int randomX = randomStartingPoint.nextInt(col - 6) + 3;
-        int randomY = randomStartingPoint.nextInt(rows - 6) + 3;
+
         this.cellSize = cellSize;
+        int randomX = randomStartingPoint.nextInt(rows) * this.cellSize;
+        int randomY = randomStartingPoint.nextInt(rows) * this.cellSize;
         this.limit = rows;
         body.add(new Point(randomX, randomY));
-        body.add(new Point(randomX, randomY - 1));
-        body.add(new Point(randomX, randomY - 2));
-        body.add(new Point(randomX, randomY - 3));
+
     }
 
     public List<Point> getBody(){
 
         return body;
     }
-    public void enlarge(){
-        double lastSegmentX = body.getLast().x;
-        double lastSegmentY = body.getLast().y;
-        Point newSegment;
-//        if(lastSegmentX == limit - 1 && lastSegmentY != limit - 1){
-//            newSegment = new Point(lastSegmentX, lastSegmentY - 1);
-//            body.add(newSegment);
-//        }else if(lastSegmentX == limit - 1 && lastSegmentY == limit - 1){
-//            newSegment = new Point(lastSegmentX - 1)
-//        }
 
-    }
 
     public void setDirection(Direction newDirection){
 
@@ -53,10 +41,7 @@ public class Snake {
         if(newDirection == Direction.LEFT && currentDirection == Direction.RIGHT) return;
         if(newDirection == Direction.RIGHT && currentDirection == Direction.LEFT) return;
 
-//        if(progress < 1.0){
-//            nextDirection = newDirection;
-//            return;
-//        }
+
         currentDirection = newDirection;
 
 
@@ -78,13 +63,17 @@ public class Snake {
             body.get(i).y = body.get(i - 1).y;
         }
 
-        switch (currentDirection) {
-            case UP -> body.getFirst().y -= 1;
-            case DOWN -> body.getFirst().y += 1;
-            case LEFT -> body.getFirst().x -= 1;
 
-            case RIGHT -> body.getFirst().x += 1;
+
+
+        switch (currentDirection) {
+            case UP -> body.getFirst().y -= cellSize;
+            case DOWN -> body.getFirst().y += cellSize;
+            case LEFT -> body.getFirst().x -= cellSize;
+
+            case RIGHT -> body.getFirst().x += cellSize;
         }
+
 
 
 

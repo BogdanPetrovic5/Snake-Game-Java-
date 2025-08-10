@@ -2,6 +2,7 @@ package controllers;
 
 import interfaces.IControlPanel;
 import interfaces.IGameUI;
+import interfaces.IStatusPanel;
 import models.*;
 
 import javax.imageio.ImageIO;
@@ -10,8 +11,8 @@ import java.io.IOException;
 import java.util.Random;
 
 public class GameController {
-    private IControlPanel controlPanel;
-    private int currentDirection;
+    private IStatusPanel _statusPanel;
+    private int _cellSize;
     private Snake _snake;
     private Food _food;
     private int gridWidth;
@@ -19,12 +20,13 @@ public class GameController {
     private final double GAME_SPEED = 0.3;
     private IGameUI _gameArea;
 
-    public GameController(Snake _snake, Food food, int width, int height){
+    public GameController(Snake _snake, Food food, int width, int height, int cellSize){
 
         this._snake = _snake;
         _food = food;
-        gridHeight = height;
-        gridWidth = width;
+        this._cellSize = cellSize;
+        gridHeight = height * this._cellSize;
+        gridWidth = width * this._cellSize;
 
 
     }
@@ -44,9 +46,10 @@ public class GameController {
         double foodX = _food.getFoodPosition().x;
         double foodY = _food.getFoodPosition().y;
 
-        if(Math.abs(snakeX - foodX) < 0.2 && Math.abs(snakeY - foodY) < 0.2){
+        if(foodX == snakeX && snakeY == foodY){
             spawnFood();
             _snake.getBody().add(new Point((int)_snake.getBody().getLast().x, (int)_snake.getBody().getLast().y));
+            _statusPanel.updateScore();
         }
     }
     public void enlargeSnake(){
@@ -55,15 +58,41 @@ public class GameController {
     public void spawnFood(){
         Random random = new Random();
 
-        int foodX = random.nextInt(gridWidth);
-        int foodY = random.nextInt(gridHeight);
+        int foodX;
+        int foodY;
+        boolean positionValid = false;
+        do{
+            foodX = random.nextInt(gridWidth / _cellSize) * this._cellSize;
+            foodY = random.nextInt(gridHeight / _cellSize) * this._cellSize;
+
+            positionValid = true;
+            for (Point segment : _snake.getBody()) {
+                if (segment.x == foodX && segment.y == foodY) {
+                    positionValid = false;
+                    break;
+                }
+            }
+        }while (!positionValid);
 
         _food.setCoordinates(foodX, foodY);
     }
     public void checkCollisions(){
+        Point head = _snake.getBody().getFirst();
+        for(int i = 2; i < _snake.getBody().size();i++){
+            Point point = _snake.getBody().get(i);
+            double headX = head.x;
+            double headY = head.y;
+
+            double bodyX = point.x;
+            double bodyY = point.y;
+            if(Math.abs(headX - bodyX) < 0.2 && Math.abs(headY - bodyY) < 0.2){
+
+                _snake.stopMoving();
+            }
+        }
+
         if(_snake.getBody().getFirst().x <= -0.2 || _snake.getBody().getFirst().x >= (gridWidth - 0.8) || _snake.getBody().getFirst().y <= -0.2 || _snake.getBody().getFirst().y >= (gridHeight - 0.8)){
             _snake.stopMoving();
-
         }
     }
     public void setDirection(Direction direction){
@@ -77,6 +106,17 @@ public class GameController {
 
     public void setFood(FoodType foodType){
         _food.setFoodType(foodType);
+    }
+    public void setSpeed(double speed){
+        _gameArea.setSpeed(speed);
+    }
+
+    public void setControlPanel(IStatusPanel statusPanel) {
+        this._statusPanel = statusPanel;
+    }
+
+    public void startGame(){
+        _gameArea.startTimer();
     }
     public void changeFood() throws IOException {
         this._gameArea.changeFood();
