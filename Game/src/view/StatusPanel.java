@@ -27,4 +27,10 @@ public class StatusPanel extends JPanel implements IStatusPanel {
         foodEaten += 1;
         label.setText("You ate: " + foodEaten);
     }
+
+    @Override
+    public void resetScore() {
+        foodEaten = 0;
+        label.setText("You ate: " + foodEaten);
+    }
 }

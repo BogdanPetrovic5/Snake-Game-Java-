@@ -35,6 +35,8 @@ public class GameArea extends JPanel implements IGameUI, ActionListener, KeyList
     private Food _food;
     private Timer _gameTimer;
     public int speed = 175;
+
+
     public GameArea(GameController gameController, Snake snake, Food food){
         this.setPreferredSize(new Dimension(600,600));
         this._snake = snake;
@@ -49,6 +51,7 @@ public class GameArea extends JPanel implements IGameUI, ActionListener, KeyList
         }catch (Exception ex){
             System.out.println(ex.getMessage());
         }
+
 
         setFocusable(true);
         requestFocusInWindow();
@@ -166,12 +169,32 @@ public class GameArea extends JPanel implements IGameUI, ActionListener, KeyList
     }
 
     @Override
-    public void showGameOver() {
+    public void showGameOver(String title) {
+        renderTimer.stop();
+        int option = JOptionPane.showOptionDialog(
+                this,
+                "Game over! Do you want to start over?",
+                title,
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.INFORMATION_MESSAGE,
+                null,
+                new String[]{"Yes", "No"},
+                "Yes"
 
+        );
+
+        if(option == 0){
+            _gameController.startOver();
+
+        }else System.exit(0);
     }
 
     @Override
     public void startTimer() {
+        if(renderTimer != null) {
+            renderTimer.stop();
+            renderTimer = null;
+        }
         renderTimer = new Timer(100, e -> {
             _gameController.moveSnake();
             _gameController.checkCollisions();

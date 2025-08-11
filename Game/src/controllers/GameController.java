@@ -30,7 +30,15 @@ public class GameController {
 
 
     }
-
+    public void startOver(){
+        _snake.getBody().clear();
+        _snake.generateRandomPosition();
+        _statusPanel.resetScore();
+        _gameArea.startTimer();
+        _snake.startMoving();
+        setDirection(null);
+        spawnFood();
+    }
     public void moveSnake(){
         if(_snake.currentDirection != null){
             _snake.move();
@@ -46,9 +54,12 @@ public class GameController {
         double foodX = _food.getFoodPosition().x;
         double foodY = _food.getFoodPosition().y;
 
-        if(foodX == snakeX && snakeY == foodY){
+        if(foodX == snakeX && snakeY == foodY && (_snake.getBody().size() - 1) <= gridHeight * gridWidth){
             spawnFood();
             _snake.getBody().add(new Point((int)_snake.getBody().getLast().x, (int)_snake.getBody().getLast().y));
+            if(_snake.getBody().size() == gridHeight * gridWidth){
+                _gameArea.showGameOver("You Won!");
+            }
             _statusPanel.updateScore();
         }
     }
@@ -78,6 +89,7 @@ public class GameController {
     }
     public void checkCollisions(){
         Point head = _snake.getBody().getFirst();
+        boolean endGame = false;
         for(int i = 2; i < _snake.getBody().size();i++){
             Point point = _snake.getBody().get(i);
             double headX = head.x;
@@ -88,11 +100,17 @@ public class GameController {
             if(Math.abs(headX - bodyX) < 0.2 && Math.abs(headY - bodyY) < 0.2){
 
                 _snake.stopMoving();
+                endGame = true;
             }
         }
 
         if(_snake.getBody().getFirst().x <= -0.2 || _snake.getBody().getFirst().x >= (gridWidth - 0.8) || _snake.getBody().getFirst().y <= -0.2 || _snake.getBody().getFirst().y >= (gridHeight - 0.8)){
             _snake.stopMoving();
+            endGame = true;
+        }
+        if(endGame){
+            _gameArea.showGameOver("You Lost!");
+
         }
     }
     public void setDirection(Direction direction){
